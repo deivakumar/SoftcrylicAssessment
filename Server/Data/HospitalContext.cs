@@ -30,7 +30,8 @@ namespace HospitalAssessment.Server.Data
                 typeBuilder.HasMany(pp => pp.ProgressNotes);
             });
 
-            var tenantsData = File.ReadAllLines(Path.Combine(AppContext.BaseDirectory, "Seeds\\Tenants.csv"));
+            var baseDir = AppContext.BaseDirectory.Substring(0, AppContext.BaseDirectory.IndexOf("bin"));
+            var tenantsData = File.ReadAllLines(Path.Combine(baseDir, "Data\\Seeds\\Tenants.csv"));
             builder.Entity<Tenant>(p =>
             {
                 var seedTenants = tenantsData.Select((name, i) => new Tenant
@@ -41,7 +42,7 @@ namespace HospitalAssessment.Server.Data
                 p.HasData(seedTenants);
             });
 
-            var patientsData = File.ReadAllLines(Path.Combine(AppContext.BaseDirectory, "Seeds\\Patients.csv"));
+            var patientsData = File.ReadAllLines(Path.Combine(baseDir, "Data\\Seeds\\Patients.csv"));
             builder.Entity<Patient>(p =>
             {
                 var seedPatients = patientsData.Select((row, i) =>
