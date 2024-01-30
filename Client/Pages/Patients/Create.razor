@@ -1,7 +1,9 @@
 ﻿@page "/patients/add";
 @using HospitalAssessment.Shared.Patients;
+@using Microsoft.AspNetCore.Authorization;
 @inject HttpClient HttpCli;
 @inject NavigationManager NavigationManager;
+@attribute [Authorize]
 
 <PageTitle>Patients - Add</PageTitle>
 <h3>Add New Patient</h3>

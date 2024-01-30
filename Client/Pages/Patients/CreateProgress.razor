@@ -2,6 +2,8 @@
 @inject HttpClient HttpCli;
 @inject NavigationManager NavigationManager;
 @using HospitalAssessment.Shared.Patients;
+@using Microsoft.AspNetCore.Authorization;
+@attribute [Authorize]
 
 <PageTitle>Patients - Progress</PageTitle>
 <h3>Add Patient Progress</h3>

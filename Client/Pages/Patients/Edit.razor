@@ -2,6 +2,8 @@
 @using HospitalAssessment.Shared.Patients;
 @inject HttpClient HttpCli;
 @inject NavigationManager NavigationManager;
+@using Microsoft.AspNetCore.Authorization;
+@attribute [Authorize]
 
 <PageTitle>Patients - Update</PageTitle>
 <h3>Update Patient</h3>

@@ -1,4 +1,7 @@
 ﻿@using HospitalAssessment.Shared.Patients;
+@using Microsoft.AspNetCore.Authorization;
+@attribute [Authorize]
+
 <EditForm Model="Patient" OnValidSubmit="SavePatientCallback" class="col-6">
     <div class="form-group mb-2">
         <label>First name *</label>
