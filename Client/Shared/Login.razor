@@ -1,0 +1,45 @@
+﻿@page "/auth";
+@using HospitalAssessment.Client.Utilities;
+@using HospitalAssessment.Shared.Patients;
+@using System.Net.Http.Headers;
+@inject HttpClient HttpCli;
+@inject NavigationManager NavigationManager;
+@inject IJSRuntime Jsr;
+@inject AuthenticationStateProvider AuthStateProvider;
+
+<h3>Authentication</h3>
+
+<EditForm Model="LoginModel" OnValidSubmit="LoginCallback" class="col-6">
+    <DataAnnotationsValidator />
+    <div class="form-group mb-2">
+        <label>Username *</label>
+        <InputText class="form-control" @bind-Value="@LoginModel.Username" required />
+    </div>
+    <div class="btn-group d-flex">
+        <button class="btn btn-success" type="submit">Authenticate</button>
+    </div>
+</EditForm>
+
+@code {
+    private LoginCommand LoginModel { get; set; } = new LoginCommand();
+
+    private async Task LoginCallback()
+    {
+        if (string.IsNullOrEmpty(LoginModel.Username)) return;
+        using (var response = await HttpCli.PostAsJsonAsync("api/auth", LoginModel, System.Threading.CancellationToken.None))
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                var authToken = await response.Content.ReadAsStringAsync();
+                if (!string.IsNullOrEmpty(authToken))
+                {
+                    await Jsr.InvokeVoidAsync("localStorage.setItem", "usr", $"{LoginModel.Username};{authToken}").ConfigureAwait(false);
+                    ((HospitalAuthStateProvider)AuthStateProvider).SetUserAsAuthenticated(LoginModel.Username);
+                    HttpCli.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", authToken);
+
+                    NavigationManager.NavigateTo("patients");
+                }
+            }
+        }
+    }
+}

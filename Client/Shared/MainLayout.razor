@@ -1,0 +1,40 @@
+﻿@using HospitalAssessment.Client.Utilities;
+@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager;
+@inject IJSRuntime Jsr;
+@inject AuthenticationStateProvider AuthStateProvider;
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <AuthorizeView>
+                <Authorized>
+                    <span class="fw-bold fs-5 m-3"> Hello, @context.User.Identity?.Name</span>
+                    <button class="btn btn-secondary" @onclick="@(() => Logout())">Logout</button>
+                </Authorized>    
+                <NotAuthorized>
+                    <a class="btn btn-outline-primary" href="auth">Login</a>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code {
+
+    private async Task Logout()
+    {
+        await Jsr.InvokeVoidAsync("localStorage.removeItem", "usr").ConfigureAwait(false);
+        ((HospitalAuthStateProvider)AuthStateProvider).SetUserAsLoggedOut();
+
+        NavigationManager.NavigateTo("/");
+    }
+}

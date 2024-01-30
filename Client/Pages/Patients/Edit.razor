@@ -1,0 +1,45 @@
+﻿@page "/patients/{patientId}";
+@using HospitalAssessment.Shared.Patients;
+@inject HttpClient HttpCli;
+@inject NavigationManager NavigationManager;
+
+<PageTitle>Patients - Update</PageTitle>
+<h3>Update Patient</h3>
+
+<PatientForm Patient="Patient" SavePatientCallback="UpdatePatient"></PatientForm>
+
+@code {
+    [Parameter]
+    public string PatientId { get; set; } = "0";
+
+    private PatientCommand Patient { get; set; } = new PatientCommand();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Patient = await HttpCli.GetFromJsonAsync<PatientCommand>($"api/patients/{PatientId}") ?? new PatientCommand();
+        }
+        catch (Exception)
+        {
+            //Failure alert
+        }
+        
+    }
+
+    private async Task UpdatePatient()
+    {
+        try
+        {
+            using (var response = await HttpCli.PutAsJsonAsync($"api/patients/{PatientId}", Patient))
+            {
+                if (response.IsSuccessStatusCode)
+                    NavigationManager.NavigateTo("patients");
+            }
+        }
+        catch (Exception)
+        {
+            //Failure alert
+        }
+    }
+}

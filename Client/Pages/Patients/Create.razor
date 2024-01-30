@@ -1,0 +1,29 @@
+﻿@page "/patients/add";
+@using HospitalAssessment.Shared.Patients;
+@inject HttpClient HttpCli;
+@inject NavigationManager NavigationManager;
+
+<PageTitle>Patients - Add</PageTitle>
+<h3>Add New Patient</h3>
+
+<PatientForm Patient="Patient" SavePatientCallback="CreatePatient"></PatientForm>
+
+@code {
+    private PatientCommand Patient { get; set; } = new PatientCommand();
+
+    private async Task CreatePatient()
+    {
+        try
+        {
+            using (var response = await HttpCli.PostAsJsonAsync("api/patients", Patient))
+            {
+                if (response.IsSuccessStatusCode)
+                    NavigationManager.NavigateTo("patients");
+            }
+        }
+        catch (Exception)
+        {
+            //Failure alert
+        }
+    }
+}

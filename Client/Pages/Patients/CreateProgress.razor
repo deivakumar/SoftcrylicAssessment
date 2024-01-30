@@ -1,0 +1,76 @@
+﻿@page "/patients/{patientId}/progress";
+@inject HttpClient HttpCli;
+@inject NavigationManager NavigationManager;
+@using HospitalAssessment.Shared.Patients;
+
+<PageTitle>Patients - Progress</PageTitle>
+<h3>Add Patient Progress</h3>
+
+<EditForm Model="ProgressNotes" OnValidSubmit="AddProgressNotes" class="col-6">
+    <button type="button" class="btn btn-primary float-end" @onclick="@(() => AddNewSection())">Add Section</button>
+    <div class="form-group">
+        <h6>Visit Date: @(DateTime.Now.ToString("dd/MM/yyyy HH:MM"))</h6>
+    </div>
+    <div class="form-group">       
+        <div class="input-group mb-3">
+            <label class="form-control border-0">Section Name *</label>
+            <label class="form-control  border-0">Section Text *</label>
+        </div>       
+        @foreach (var item in ProgressNotes)
+        {
+            <div class="input-group mt-2">
+                <InputText class="form-control" required @bind-Value="@item.SectionName" placeholder="Section Name" />
+                <InputText class="form-control" required @bind-Value="@item.SectionText" placeholder="Section Text" />
+                @if (item.Index > 0)
+                {
+                    <button type="button" class="btn btn-danger" @onclick="@(() => RemoveSection(item.Index))"><i class="oi oi-delete"></i></button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-secondary" disabled><i class="oi oi-delete"></i></button>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="btn-group d-flex mt-3">
+        <button class="btn btn-success" type="submit">Submit</button>
+        <a href="patients" class="btn btn-secondary">Cancel</a>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public string PatientId { get; set; } = string.Empty;
+
+    public List<PatientProgressNoteCommand> ProgressNotes { get; set; } = new List<PatientProgressNoteCommand> { new PatientProgressNoteCommand() { Index = 0 } };
+
+    private async Task AddProgressNotes()
+    {
+        try
+        {
+            using (var response = await HttpCli.PostAsJsonAsync("api/patients/" + PatientId + "/progress", ProgressNotes))
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    if (response.IsSuccessStatusCode)
+                        NavigationManager.NavigateTo("patients");
+                }
+            }
+        }
+        catch (Exception)
+        {
+            //Failure alert
+        }
+    }
+
+    private void AddNewSection()
+    {
+        ProgressNotes.Add(new PatientProgressNoteCommand() { Index = ProgressNotes.Count });
+    }
+
+    private void RemoveSection(int index)
+    {
+        ProgressNotes.RemoveAll(p => p.Index == index);
+    }
+}

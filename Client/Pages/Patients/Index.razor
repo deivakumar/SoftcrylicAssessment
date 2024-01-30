@@ -1,0 +1,95 @@
+﻿@page "/patients";
+@using HospitalAssessment.Shared.Patients;
+@using Microsoft.AspNetCore.Authorization;
+@inject HttpClient HttpCli;
+@inject NavigationManager NavigationManager;
+@inject IJSRuntime Jsr;
+@attribute [Authorize]
+
+<PageTitle>Patients</PageTitle>
+<h3>Patients <a class="btn btn-primary float-end" href="patients/add">Add Patient</a></h3>
+
+<div class="form-group col-4">
+    <div class="input-group mb-3">
+        <input type="search" class="form-control" @bind-value="@SearchText" placeholder="Search Patient" />
+        <button class="btn btn-outline-primary" @onclick="@(() => FetchPatients())">Search</button>
+    </div>
+</div>
+@if (Patients == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (Patients.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Firstname</th>
+                <th>Lastname</th>
+                <th>City</th>
+                <th>Sate</th>
+                <th>Visits</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var patient in Patients)
+            {
+                <tr>
+                    <td>@patient.FirstName</td>
+                    <td>@patient.LastName</td>
+                    <td>@patient.City</td>
+                    <td>@patient.State</td>
+                    <td>@patient.Visits.Count()</td>
+                    <td>
+                        <div class="btn-group">
+                            <a class="btn btn-outline-primary" href="patients/@patient.PatientId/progress">Add Progress</a>
+                            <a class="btn btn-outline-info" href="patients/@patient.PatientId">Edit</a>
+                            <button class="btn btn-outline-secondary" @onclick="@(() => DeletePatient(patient.PatientId))">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <h5>No data found.</h5>
+}
+
+@code {
+    private string SearchText { get; set; } = string.Empty;
+    private List<PatientCommand>? Patients { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await FetchPatients();
+    }
+
+    private async Task FetchPatients()
+    {
+        try
+        {
+            Patients = await HttpCli.GetFromJsonAsync<List<PatientCommand>>($"api/Patients?searchText={SearchText}") ?? new List<PatientCommand>();
+        }
+        catch (Exception)
+        {
+            //Failure alert
+        }        
+    }
+
+    private async Task DeletePatient(int patientId)
+    {
+        try
+        {
+            var response = await HttpCli.DeleteAsync("api/patients/" + patientId);
+            if (response.IsSuccessStatusCode)
+                await FetchPatients();
+        }
+        catch (Exception)
+        {
+            //Failure alert
+        }
+    }
+}
